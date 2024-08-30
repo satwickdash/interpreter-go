@@ -6,13 +6,42 @@ import (
 	"testing"
 )
 
+func TestReturnStatements(t *testing.T) {
+	input := `
+		return 5;
+		return 10;
+		return add(10, 5);
+	`
+
+	lex := lexer.New(input)
+	prser := New(lex)
+
+	program := prser.parseProgram()
+	checkParserErrors(t, prser)
+	if program == nil {
+		t.Fatalf("Program is nil.")
+	}
+
+	if len(program.Statements) != 3 {
+		t.Fatalf("program.Statements does not contain 3 statements. Found: %d", len(program.Statements))
+	}
+
+	for _, stmt := range program.Statements {
+		returnStmt, ok := stmt.(*ast.ReturnStatement)
+		if !ok {
+			t.Errorf("Stmt not an *ast.ReturnStatement, actually is %T", stmt)
+		}
+		if returnStmt.TokenLiteral() != "return" {
+			t.Errorf("returnStmt.TokenLiteral() not 'return', got %q", returnStmt.TokenLiteral())
+		}
+	}
+}
+
 func TestLetStatements(t *testing.T) {
 	input := `
 		let x = 5;
 		let y = 10;
 		let foobar = 10833;
-		let = 20;
-		let 3781 = x;
 	`
 
 	lex := lexer.New(input)
